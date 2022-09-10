@@ -2,22 +2,25 @@ class Solution {
 public:
     int maxProfit(int k, vector<int>& prices) {
         int n = prices.size();
-        vector<vector<vector<int>>> dp(n+1,vector<vector<int>>(2,vector<int>(k+1,0)));
+        vector<vector<int>> ahead(2,vector<int> (k+1,0));
+        vector<vector<int>> cur(2,vector<int> (k+1,0));
         for(int ind = n-1; ind>=0; ind--){
             for(int buy = 0; buy<=1; buy++){
                 for(int cap=1; cap<=k; cap++){
                     if(buy==0){// We can buy the stock
-                        dp[ind][buy][cap] = max(0+dp[ind+1][0][cap], -prices[ind] + dp[ind+1][1][cap]);
-                     }
+                        cur[buy][cap] = max(0+ahead[0][cap],-prices[ind] + ahead[1][cap]);
+                    }
                     if(buy==1){// We can sell the stock
-                        dp[ind][buy][cap] = max(0+dp[ind+1][1][cap],prices[ind] + dp[ind+1][0][cap-1]);
+                        cur[buy][cap] = max(0+ahead[1][cap],prices[ind] + ahead[0][cap-1]);
                     }
                 }
             }
+            ahead = cur;
         }
-        return dp[0][0][k];
+        return ahead[0][k];
     }
 };
+
 
 
 /*
@@ -25,18 +28,19 @@ Intuition:
 Every day, we will have two choices, either to do nothing and move to the next day or to buy/sell (based on the last transaction and the number of transactions left) and find out the profit. Therefore we need to generate all the choices in order to compare the profit. As we need to try out all the possible choices, we will use recursion and then further optimize it using Dp because of overlapping sub-problems.
 
 
-Recursive Solution to Tabulation:
-Approach:(Tabulation DP)
+Tabulation to Space Optimization:
+If we see carefully, one thing that we can notice is that: dp[ind][buy][cap] = max( dp[ind+1][buy][cap] , max( dp[ind+1][!buy][cap])
+So, to calculate a value of a cell of the dp array, we need only the next row values(say ahead of ind+1). So, we don’t need to store an entire 2-D array. Hence we can Space Optimize it.
+Steps:
 
-First we declare the dp array of size [n+1][2][k+1] as zero.
-As we have initialized the array as 0, we have automatically set the base condition i.e if( ind == n || cap == 0) return 0
-Now, when we are traversing the array in the opposite direction of that of the memoization technique. We will start from ind = n-1 -> ind =0, absolutely in the reverse fashion.
-In every iteration copy the recursive code logic.
-At last dp[0][0][k] ( maximum profit generated on ith day, when we can buy the stock on 0th day and can have a total k transactions) gives us the final answer.
-C++:(Tabulation)
-
+We create two 2D vector ahead and cur both initialized to 0 (base condition)
+Then we set three nested loops to calculate the cur array’s values.
+We replace dp[ind] with cur and dp[ind+1] with ahead in our tabulation code.
+After the inner loop execution is done, we set ahead as cur for the next outer loop iteration.
+At last, we return ahead[0][k] as our answer.
+C++:(Space Optimized)
 
 Time Complexity: O(N*2xK)
-Space Complexity: O(N*2xK)
+Space Complexity: O(K) We are using two external arrays of size ‘2*K’.
 
 */
