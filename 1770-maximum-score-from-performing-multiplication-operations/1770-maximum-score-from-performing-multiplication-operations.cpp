@@ -33,5 +33,4 @@ and we will calculate the maximum score for each i.
 
 Time Complexity: O(M*M)
 Space Complexity: O(M*M)
-
 */
