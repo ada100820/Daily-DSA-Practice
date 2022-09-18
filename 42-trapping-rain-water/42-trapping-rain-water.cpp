@@ -1,41 +1,44 @@
 class Solution {
 public:
     int trap(vector<int>& height) {
-			int n = height.size();
-			if(n == 0) {
-				return 0;
-			}
-			int left[n];
-			int right[n];
-			left[0] = height[0];
-			for(int i = 1; i < n; i++) {
-				left[i] = max(left[i - 1], height[i]);
-			}
-			right[n - 1] = height[n - 1];
-			for(int i = n - 2; i >= 0; i--) {
-				right[i] = max(right[i + 1], height[i]);
-			}
-			int total = 0;
-			for(int i = 0; i < n; i++) {
-				total += min(left[i], right[i]) - height[i];
-			}
-			return total;
-	}
+        int n = height.size();
+        int left = 0, right = n - 1;
+        int left_max = 0, right_max = 0;
+        int water_stored = 0;
+
+        while (left < right) {
+            if (height[left] < height[right]) {
+                if (height[left] >= left_max) {
+                    left_max = height[left];
+                } else {
+                    water_stored += left_max - height[left];
+                }
+                left++;
+            } else {
+                if (height[right] >= right_max) {
+                    right_max = height[right];
+                } else {
+                    water_stored += right_max - height[right];
+                }
+                right--;
+            }
+        }
+        return water_stored;
+    }
 };
 
 
 /*
-Intuition: Precomputation:
-We can precompute the maximum height of the bar to the left and right of each bar in linear time.
+Intuition: Two Pointers:
+We need a minimum of left and right. if left is smaller, we can trap water, if right is smaller, we can trap water, if left and right are equal we can't trap water.
 
 Approach:
---> We will now precompute the maximum height of the bar to the left and right of the current bar.
---> Store the maximum height of the bar to the left and right of the current bar in two arrays.
---> Then iterate over the array and calculate the amount of water that can be stored in the current bar.
---> Finally add the amount of water that can be stored in the current bar to the total amount of water that can be
-    stored in the array and return the total amount of water that can be stored in the array.
+--> Find the max height of the left and right
+--> If the left is smaller than the right, then the water trapped depends on the left
+--> If the right is smaller than the left, then the water trapped depends on the right
+--> If the left is equal to the right, then the water trapped depends on either
+--> Move the pointer that is smaller than the other
+--> Repeat until the two pointers meet.
 --> Time Complexity: O(n), where n is the number of bars in the histogram.
---> Space Complexity: O(n)
-
-
+--> Space Complexity: O(1)
 */
